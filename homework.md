@@ -1,0 +1,11 @@
+- Create a repository
+-Initialize the repository
+-node_modules , packages.json , -package-lock.json
+-install express
+-Listen to port 7777
+-write request handelers for 
+-what are dependecies
+--what is the use of -g whilke npm install
+--Difference between cret and tilde 
+
+--SUBAH SOLVE KARNA HAI YE SAB KO INSHALLAH
