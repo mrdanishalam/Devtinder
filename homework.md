@@ -13,3 +13,4 @@
 --explore different typesof routing and use of ? , + , () , * in the routes
 --Use of regex in routes /a/ , /.*fly$/
 --How to red the query params reading the dynamic routes
+--Error HAndling

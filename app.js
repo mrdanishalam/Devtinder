@@ -77,27 +77,38 @@ const app = express();
 //=== Dummy Auth For Admin Middleware || User
 
 
-const {adminAuth , userAuth}=require("./middlewares/auth");
+// const {adminAuth , userAuth}=require("./middlewares/auth");
 
-app.use("/admin" , adminAuth);
-// app.use("/user",userAuth);
+// app.use("/admin" , adminAuth);
+// // app.use("/user",userAuth);
 
-app.post("/user/login",(req,res)=>{
-res.send("User Login Is going on , Welcome abroad!!!")
-});
+// app.post("/user/login",(req,res)=>{
+// res.send("User Login Is going on , Welcome abroad!!!")
+// });
 
-app.get("/user/data",userAuth ,(req,res)=>{
-    res.send("User side data will send")
-})
+// app.get("/user/data",userAuth ,(req,res)=>{
+//     res.send("User side data will send")
+// })
 
-app.get("/admin/getdata",(req,res)=>{
-    res.send("Data send bhai check karle jakar");
-});
+// app.get("/admin/getdata",(req,res)=>{
+//     res.send("Data send bhai check karle jakar");
+// });
 
-app.get("/admin/deletedata",(req,res)=>{
-    res.send("Deleted User data successfully");
-});
+// app.get("/admin/deletedata",(req,res)=>{
+//     res.send("Deleted User data successfully");
+// });
 
+
+//====== Error Handling ========///
+
+app.get("/getUSerDAta",(req,res)=>{
+    try{
+throw new Error("fhfgiuwrgu");
+res.send("USer DAta sent")
+}catch(err){
+res.status(500).send("something went wrong")
+    }
+    });
 
 app.listen(7777,()=>{
     console.log("bhai start h gya server");
