@@ -14,3 +14,10 @@
 --Use of regex in routes /a/ , /.*fly$/
 --How to red the query params reading the dynamic routes
 --Error HAndling
+--Create a free cluster 
+--Connect Databse
+--Create POST /Signup API to add data to database
+--Push Some documents to using API call to postman
+
+--Add the express.json to your app
+--Make your signup API dynamic to recieve data from the end user

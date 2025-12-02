@@ -2,6 +2,45 @@ const express = require('express');
 
 const app = express();
 
+const connectDB=require("./config/database");
+const use=require("./models/user");
+
+
+app.use(express.json());
+
+app.post("/signup",async(req,res)=>{
+   
+    
+    //Creating a new USerSchamea Instance \
+
+    const user= new use(req.body);
+
+    try{
+        await user.save();
+        res.send("USer Added Sucessfully");
+    }catch(err){
+        res.status(400).send("Error Occuring:"+ err.message);
+        
+    }
+});
+
+
+
+connectDB()
+.then(()=>{
+    console.log("Databse established successfully");
+app.listen(7777,()=>{
+    console.log("bhai start h gya server");
+    });
+
+})
+.catch((err)=>{
+    console.log("DAtabase connection cannot comoleted");
+});
+
+
+
+
 //This will only handle get call to /test
 // app.get("/user",(req,res)=>{
 // res.send({firstname:"Danish",lastname:"hassan"})
@@ -101,17 +140,13 @@ const app = express();
 
 //====== Error Handling ========///
 
-app.get("/getUSerDAta",(req,res)=>{
-    try{
-throw new Error("fhfgiuwrgu");
-res.send("USer DAta sent")
-}catch(err){
-res.status(500).send("something went wrong")
-    }
-    });
+// app.get("/getUSerDAta",(req,res)=>{
+//     try{
+// throw new Error("fhfgiuwrgu");
+// res.send("USer DAta sent")
+// }catch(err){
+// res.status(500).send("something went wrong")
+//     }
+//     });
 
-app.listen(7777,()=>{
-    console.log("bhai start h gya server");
-    
-});
 
