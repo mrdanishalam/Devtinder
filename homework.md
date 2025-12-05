@@ -21,3 +21,12 @@
 
 --Add the express.json to your app
 --Make your signup API dynamic to recieve data from the end user
+
+
+--User.findone find with duplicate email Ids , which object returned ...........
+--API - Get User By Email .........
+--API - Feed API - Get / feed - get all the users from database ................
+--API -Update a User
+--Explore the mongoose documentation for models methods
+--What are options in a model . FindOneUpdate method , Explore more about it.
+--API - Update the user with Email Id.

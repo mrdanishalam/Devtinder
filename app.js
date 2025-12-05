@@ -1,47 +1,105 @@
 const express = require('express');
-
 const app = express();
-
 const connectDB=require("./config/database");
-const use=require("./models/user");
-
+const User=require("./models/user");
 
 app.use(express.json());
-
 app.post("/signup",async(req,res)=>{
-   
-    
     //Creating a new USerSchamea Instance \
 
-    const user= new use(req.body);
-
+    const user= new User(req.body);
     try{
         await user.save();
         res.send("USer Added Sucessfully");
     }catch(err){
         res.status(400).send("Error Occuring:"+ err.message);
-        
+    }
+});
+
+app.get("/user",async(req,res)=>{
+const userEmail =req.body.emailId;
+
+try{
+    console.log(userEmail);
+    const users =await User.findOne({emailId:userEmail});
+    if(!users){
+        res.status(404).send("User Not Found");
+    }else{
+        res.status(200).send(users);
+    }
+}catch(err){
+        res.status(500).send("Error Occuring:"+ err.message);
     }
 });
 
 
+// Feed API - Get/Feed all the users from the database
+app.get("/feed",async(req,res)=>{
+
+})
+
+//Delete User API - Delete a user by ID
+app.delete("/user",async(req,res)=>{
+const userId = req.body.userId;
+
+    try{
+
+const user =await User.findByIdAndDelete(userId);
+res.send("User Deleted Successfully")
+    }catch(err){
+        res.status(500).send("Error Occuring:"+ err.message);
+    }
+})
+
+//Update User Of the datax
+
+app.patch("/user",async(req,res)=>{
+    const userId = req.body.userId;
+const data =req.body;
+    try{
+        const user=await User.findByIdAndUpdate({userId},data,{
+            returnDocument:"after",
+            runValidators:true,
+        });
+    res.send("User Updated Successfully")
+    }catch(err){
+res.status(500).send("Error Occuring:"+ err.message);
+    }
+})
+
+//Update User by using emailId
+
+// app.patch("/user",async(req,res)=>{
+//     const userEmail = req.body.emailId;
+//     const data=req.body;
+// const data =req.body.emailId;
+//     try{
+//         const UpdateUser=await User.findOneAndUpdate({emailId:userEmail},data);
+//     // res.send("User Updated Successfully by using emailId")
+//         if(!UpdateUser){
+//         res.status(404).send("User Does'nt exists!!")
+//     }
+//         res.status(200).send("User Updated Successfully")
+// }catch(err){
+// res.status(500).send("Error Occuring"+ err.message);
+
+//     }
+// })
+
 
 connectDB()
 .then(()=>{
-    console.log("Databse established successfully");
+    console.log("Databse Established Successfully");
 app.listen(7777,()=>{
     console.log("bhai start h gya server");
     });
-
 })
 .catch((err)=>{
-    console.log("DAtabase connection cannot comoleted");
+    console.log("Database connection cannot completed");
 });
 
-
-
-
 //This will only handle get call to /test
+
 // app.get("/user",(req,res)=>{
 // res.send({firstname:"Danish",lastname:"hassan"})
 // });
@@ -148,5 +206,3 @@ app.listen(7777,()=>{
 // res.status(500).send("something went wrong")
 //     }
 //     });
-
-
