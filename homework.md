@@ -30,3 +30,7 @@
 --Explore the mongoose documentation for models methods
 --What are options in a model . FindOneUpdate method , Explore more about it.
 --API - Update the user with Email Id.
+
+
+--Add API level validation on patch requests & post API
+--Data Sanitizing - Add a API vlidation for each field 

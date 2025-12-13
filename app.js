@@ -2,20 +2,109 @@ const express = require('express');
 const app = express();
 const connectDB=require("./config/database");
 const User=require("./models/user");
-
+const validator=require('validator');
+const {validateSignupData}=require("./utils/validation")
+const bcrypt=require('bcrypt');
+const cookieParser=require("cookie-parser");
+const jwt=require('jsonwebtoken');
+const { userAuth } = require('./middlewares/auth');
 app.use(express.json());
-app.post("/signup",async(req,res)=>{
-    //Creating a new USerSchamea Instance \
+app.use(cookieParser());
 
-    const user= new User(req.body);
+
+//Signup new USer
+app.post("/signup",async(req,res)=>{
+
+
+
     try{
+    //Validation of data
+     validateSignupData(req);
+        const {firstName,lastName,emailId,password}=req.body;
+
+        //Password Encryption //Hashing
+
+        const passwordHash= await bcrypt.hash(password,10);
+        console.log(passwordHash);
+        
+//Creating a new USerSchamea Instance 
+const user=new User({
+    firstName,
+    lastName,
+    emailId,
+    password:passwordHash,
+})
         await user.save();
-        res.send("USer Added Sucessfully");
+//         if(data?.skills.length>10){
+//     throw new Error(":Skills section Cannot be more than 10");
+// }
+
+res.send("USer Added Sucessfully");
     }catch(err){
-        res.status(400).send("Error Occuring:"+ err.message);
+        res.status(400).send("ERROR:"+ err.message);
     }
 });
 
+//Login API
+app.post("/Login",async(req,res)=>{
+
+
+    try{
+        const {emailId,password}=req.body;
+        const user=await User.findOne({emailId:emailId});
+        if(!user){
+            throw new Error("Invalid Credeatinoals")
+        }
+        const isPasswordValid = await bcrypt.compare(password,user.password);
+        if(isPasswordValid){
+            //Create a JWT Token
+const token =await jwt.sign({_id:user._id},"Danishhassan@2005",{
+    expiresIn:"1d",
+});
+            //Add the token to cookie and send the response back to the user!!!
+
+            res.cookie("token",token,{
+                expires:new Date(Date.now()+8*3600000)
+            })
+            console.log(token);
+            
+            res.send("Login Syccessfully")
+        }else{
+            throw new Error("Invalid Credeatinoals")
+        }
+
+    }catch(err){
+        res.status(500).send("Error Occuring:"+ err.message);
+    }
+})
+
+//Profile API
+
+app.get("/profile",async(req,res)=>{
+    try{
+    const cookies=req.cookies;
+    console.log(cookies);
+    
+
+    const{token}=cookies;
+    if(!token){
+        throw new Error("Invalid TOken");
+    }
+    const decodeMeassage =await jwt.verify(token,"Danishhassan@2005");
+const {_id}=decodeMeassage;
+const user =await User.findById(_id);
+if(!user){
+    throw new Error("User does not exists!");
+}
+
+res.send(user);
+}catch(err){
+        res.status(500).send("Error Occuring:"+ err.message);
+    }
+});
+
+
+//Fetch User Data
 app.get("/user",async(req,res)=>{
 const userEmail =req.body.emailId;
 
@@ -35,16 +124,24 @@ try{
 
 // Feed API - Get/Feed all the users from the database
 app.get("/feed",async(req,res)=>{
-
+try {
+    const users = await User.find({});
+    res.status(200).send(users);
+  } catch (err) {
+    res.status(500).send("Error:" + err.message);
+  }
 })
 
 //Delete User API - Delete a user by ID
-app.delete("/user",async(req,res)=>{
-const userId = req.body.userId;
-
-    try{
-
-const user =await User.findByIdAndDelete(userId);
+app.delete("/user/:userId",async(req,res)=>{
+const userId = req.params?.userId;
+const data=req.body;
+try{
+const DELETE_ALLOWED=["skills","about"];
+const isUpdateAllowed=Object.keys(data).every((k)=>
+DELETE_ALLOWED.includes(k)
+);
+const user =await User.deleteOne({_id:userId},data);
 res.send("User Deleted Successfully")
     }catch(err){
         res.status(500).send("Error Occuring:"+ err.message);
@@ -52,12 +149,22 @@ res.send("User Deleted Successfully")
 })
 
 //Update User Of the datax
-
-app.patch("/user",async(req,res)=>{
-    const userId = req.body.userId;
-const data =req.body;
+app.patch("/user/:userId",async(req,res)=>{
+    const userId = req.params?.userId;
+    const data =req.body;
     try{
-        const user=await User.findByIdAndUpdate({userId},data,{
+const ALLOWED_UPDATES =["age","photourl","gender","skills"];
+const isUpdateAllowed =Object.keys(data).every((k)=>
+    ALLOWED_UPDATES.includes(k)
+);
+if(!isUpdateAllowed){
+    throw new Error("Update Not Allowed"); 
+}
+if(data?.skills.length>10){
+    throw new Error(":Skills section Cannot be more than 10");
+}
+
+        const user=await User.findByIdAndUpdate({ _id: userId},data,{
             returnDocument:"after",
             runValidators:true,
         });
@@ -86,6 +193,17 @@ res.status(500).send("Error Occuring:"+ err.message);
 //     }
 // })
 
+
+//Sending Connection Report
+
+app.post("/sentconnection",userAuth,async(req,res)=>{
+const user=req.user;
+   try{
+    res.send(user.firstName +" Sending Connection Request !!")
+   }catch(err){
+    res.status(500).send("Error Occuring " +err.message)
+}
+})
 
 connectDB()
 .then(()=>{
@@ -138,7 +256,7 @@ app.listen(7777,()=>{
 // });
 
 
-//======= MULTIPLE ROUTE HANDELERS & MIDDLEWARE CHAINING ======//
+//======= MULTIPLE ROUTE HANDELERS & MIDDLEWARE CHAINING (Multiple Handler Chaining)======//
 
 // app.get(
 //   "/user",
@@ -206,3 +324,6 @@ app.listen(7777,()=>{
 // res.status(500).send("something went wrong")
 //     }
 //     });
+
+
+
